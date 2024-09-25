@@ -1,12 +1,12 @@
-; Filename: EXER14.ASM
-; Programmer Name: ENARIO, LANCE JOSEPH LORENZ
+; Filename: EXER19.ASM
+; Programmer Name: ENARIO, LANCE JOSEPH LORENZ S.
 ; Date: 09/19/2024
 ; Description: Create a program that asks the user to input 3 characters. 
 ; Then display each character on its own line.
 
 
 .model small
-.stack 200h
+.stack 100h
 .data 
     firstChar db ?
     secondChar db ?

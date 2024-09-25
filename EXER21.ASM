@@ -7,125 +7,130 @@
 .model small
 .stack 100h
 .data
-
-StringLength EQU 1000
-
-buffer db 100
-
-
-firstName db StringLength DUP (?)
-secondName db StringLength DUP (?)
-thirdName db StringLength DUP (?)
-
-firstPrompt db 'Enter First Name: $'
-secondPrompt db 'Enter Middle Name: $'
-thirdPrompt db 'Enter Family Name: $'
-
-startMessage db 'REGISTRATION FORM$'
-outputMessage db 'Hello, $'
-
-newline db '', 0ah, 0ah, '$'
-
+    promptFirst db 'Enter first name: $'
+    promptMiddle db 'Enter middle name: $'
+    promptFamily db 'Enter family name: $'
+    firstName db 50, 0, 50 dup('$')
+    middleName db 50, 0, 50 dup('$')
+    familyName db 50, 0, 50 dup('$')
+    newline db 13, 10, '$'
+    helloMsg db 'Hello, $'
+    exclamation db '!$'
 .code
-ProgramStart:
+main proc
     mov ax, @data
     mov ds, ax
+    mov es, ax
 
-;firstName
-
-    mov dx, OFFSET startMessage
-    mov ah, 9 
+    ; Prompt for first name
+    lea dx, promptFirst
+    mov ah, 09h
     int 21h
 
-    mov dx, OFFSET newline
-    mov ah, 9 
+    ; Read first name
+    lea dx, firstName
+    mov ah, 0Ah
     int 21h
 
-    mov dx, OFFSET firstPrompt
-    mov ah, 9 
+    ; Move cursor to new line
+    lea dx, newline
+    mov ah, 09h
     int 21h
 
-    mov ah, 3fh     ; DOS read from handle function
-    mov bx, 0       ; standard input handle
-    mov cx, StringLength   ; read up to maximum number of characters
-
-    mov dx, OFFSET firstName  ; store the string here
+    ; Prompt for middle name
+    lea dx, promptMiddle
+    mov ah, 09h
     int 21h
 
-    dec ax
-    and ax, ax      ; checks if character was read
-    jz Done
-    mov cx, ax      ; put string length in CX to be used as a counter
-
-    push cx        ; save the string length
-    mov bx, OFFSET firstName
-
-; secondName
-    mov dx, OFFSET secondPrompt
-    mov ah, 9 
+    ; Read middle name
+    lea dx, middleName
+    mov ah, 0Ah
     int 21h
 
-    mov ah, 3fh     ; DOS read from handle function
-    mov bx, 0       ; standard input handle
-    mov cx, StringLength   ; read up to maximum number of characters
-
-    mov dx, OFFSET secondName  ; store the string here
+    ; Move cursor to new line
+    lea dx, newline
+    mov ah, 09h
     int 21h
 
-    dec ax
-    and ax, ax      ; checks if character was read
-    jz Done
-    mov cx, ax      ; put string length in CX to be used as a counter
-
-    push cx        ; save the string length
-    mov bx, OFFSET secondName
-
-; thirdName
-
-    mov dx, OFFSET thirdPrompt
-    mov ah, 9 
+    ; Prompt for family name
+    lea dx, promptFamily
+    mov ah, 09h
     int 21h
 
-    mov ah, 3fh     ; DOS read from handle function
-    mov bx, 0       ; standard input handle
-    mov cx, StringLength   ; read up to maximum number of characters
-
-    mov dx, OFFSET thirdName  ; store the string here
+    ; Read family name
+    lea dx, familyName
+    mov ah, 0Ah
     int 21h
 
-    dec ax
-    and ax, ax      ; checks if character was read
-    jz Done
-    mov cx, ax      ; put string length in CX to be used as a counter
-
-    push cx        ; save the string length
-    mov bx, OFFSET thirdName
-
-; output
-
-    mov dx, OFFSET outputMessage
-    mov ah, 9 
+    ; Move cursor to new line
+    lea dx, newline
+    mov ah, 09h
     int 21h
 
-    pop cx          ; get the string length
-    mov ah, 40h   ; DOW write form handle function
-    mov bx, 1       ; standard output handle
-    mov dx, OFFSET firstName
-    int 21h         ; print the string
-
-    pop cx          ; get the string length
-    mov ah, 40h   ; DOW write form handle function
-    mov bx, 1       ; standard output handle
-    mov dx, OFFSET secondName
-    int 21h         ; print the string
-
-    pop cx          ; get the string length
-    mov ah, 40h   ; DOW write form handle function
-    mov bx, 1       ; standard output handle
-    mov dx, OFFSET thirdName
-    int 21h         ; print the string
-
-Done: 
-    mov ah, 4ch
+    ; Print "Hello, "
+    lea dx, helloMsg
+    mov ah, 09h
     int 21h
-end ProgramStart;
+
+    ; Print first name
+    lea si, firstName + 2         ; Point to the first name data
+    mov cl, [firstName + 1]       ; Get length of the first name
+
+    ; Temporarily append a $ after the string for DOS interrupt
+    mov di, si                    ; Copy si to di
+    add di, cx                    ; Move di to the end of the string (si + length)
+    mov byte ptr [di], '$'        ; Set the $ terminator at the end of the string
+    
+    lea dx, [si]                  ; Load the string address
+    mov ah, 09h
+    int 21h                       ; Print the first name
+
+    ; Print a space
+    mov dl, ' '
+    mov ah, 02h
+    int 21h
+
+    ; Print middle name
+    lea si, middleName + 2         ; Point to the middle name data
+    mov cl, [middleName + 1]       ; Get length of the middle name
+
+    ; Temporarily append a $ after the string for DOS interrupt
+    mov di, si                    ; Copy si to di
+    add di, cx                    ; Move di to the end of the string (si + length)
+    mov byte ptr [di], '$'        ; Set the $ terminator at the end of the string
+    lea dx, [si]                  ; Load the string address
+    mov ah, 09h
+    int 21h                       ; Print the middle name
+
+    ; Print a space
+    mov dl, ' '
+    mov ah, 02h
+    int 21h
+
+    ; Print family name
+    lea si, familyName + 2         ; Point to the family name data
+    mov cl, [familyName + 1]       ; Get length of the family name
+
+    ; Temporarily append a $ after the string for DOS interrupt
+    mov di, si                    ; Copy si to di
+    add di, cx                    ; Move di to the end of the string (si + length)
+    mov byte ptr [di], '$'        ; Set the $ terminator at the end of the string
+    lea dx, [si]                  ; Load the string address
+    mov ah, 09h
+    int 21h                       ; Print the family name
+
+    ; Print "!"
+    lea dx, exclamation
+    mov ah, 09h
+    int 21h
+
+    ; Print newline
+    lea dx, newline
+    mov ah, 09h
+    int 21h
+
+    ; Exit program
+    mov ah, 4Ch
+    int 21h
+main endp
+end main
