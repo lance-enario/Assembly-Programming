@@ -1,4 +1,4 @@
-; Filename: EXER16.ASM
+; Filename: EXER20.ASM
 ; Programmer Name: ENARIO, LANCE JOSEPH LORENZ S.
 ; Date: DATE TODAY
 ; Description: This assembly language program will get character input and 

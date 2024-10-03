@@ -1,5 +1,5 @@
 ; Filename: EXER14.ASM
-; Programmer Name: ENARIO, LANCE JOSEPH LORENZ
+; Programmer Name: ENARIO, LANCE JOSEPH LORENZ S.
 ; Date: 09/19/2024
 ; Description: This assembly language program will get character input and 
 ; display back character input.
