@@ -17,8 +17,8 @@
 .STACK 100h
 
 .DATA
-    header  DB  ' THE CALCULATOR', 13, 10, 
-            DB  'Created by: LANCE JOSEPH LORENZ S. ENARIO', 13, 10,
+    header  DB  'THE CALCULATOR', 13, 10 
+            DB  'Created by: LANCE JOSEPH LORENZ S. ENARIO', 13, 10
             DB  'Date: 09/29/2024', 13, 10, 10, '$'
 
     mainMenu db 'Main Menu', 13, 10, '$'

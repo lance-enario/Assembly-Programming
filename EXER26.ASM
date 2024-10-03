@@ -1,96 +1,133 @@
 ; Filename: EXER26.ASM
 ; Programmer Name: ENARIO, LANCE JOSEPH LORENZ S.
-; Date: September 26, 2024
-; Description:  Make a program to input two integers, subtract the second 
-; integer from the first integer, and display the difference
-; of the two integers.
+; Date: 09/29/2024
+; Description: Make a program to input two integers, add the two integers,
+; and display the sum of the two integers.
 
-.model small
-.stack 100h
-.data
+.MODEL SMALL
+.STACK 100h
 
-    additionPrompt1 db 'Enter first addend: $'
-    additionPrompt2 db 'Enter second addend: $'
-    resultText db 'Result: $'
-    newline1 db '', 0ah, '$'
+.DATA
+    prompt1 DB 'Enter first addend: $'
+    prompt2 DB 'Enter second addend: $'
 
-    input1 db ?      ; Store first input (ASCII char)
-    input2 db ?      ; Store second input (ASCII char)
+    additionOutput1 db 'First addend is: $'
+    additionOutput2 DB 'Second addend is: $'
 
-.code
+    resultMsg DB 'Sum: $'
+    num1 DW 0
+    num2 DW 0
+    result DW 0
+    newline DB 0Dh, 0Ah, '$'    ; Newline for printing
 
-main:
-    mov ax, @data
-    mov ds, ax
+.CODE
+MAIN PROC
+    ; Initialize DS register
+    MOV AX, @DATA
+    MOV DS, AX
 
-    ; Input first addend
-    lea dx, additionPrompt1
-    mov ah, 9
-    int 21h
+    ; Print prompt1 (Enter first number)
+    LEA DX, prompt1
+    MOV AH, 09h
+    INT 21h
 
-    mov ah, 01h      ; Read first addend (as char)
-    int 21h 
-    sub al, '0'      ; Convert char to number
-    mov bl, al       ; Store first number in BL
+    ; Read first number from input
+    CALL ReadNumber
+    MOV num1, AX  ; Store first number in num1
 
-    ; Display newline
-    mov dx, OFFSET newline1
-    mov ah, 09h
-    int 21h
+    ; Print prompt2 (Enter second number)
+    LEA DX, prompt2
+    MOV AH, 09h
+    INT 21h
 
-    ; Input second addend
-    lea dx, additionPrompt2
-    mov ah, 9
-    int 21h
+    ; Read second number from input
+    CALL ReadNumber
+    MOV num2, AX  ; Store second number in num2
 
-    mov ah, 01h      ; Read second addend (as char)
-    int 21h 
-    sub al, '0'      ; Convert char to number
-    add bl, al       ; Add second number to BL
+    LEA DX, additionOutput1
+    MOV AH, 09h
+    INT 21h
 
-    ; Show "Result: "
-    lea dx, resultText
-    mov ah, 9
-    int 21h
+    MOV AX, num1
+    call PrintNumber
 
-    ; Check if result is greater than 9 (i.e., multi-digit)
-    cmp bl, 9
-    jg multi_digit   ; Jump to multi-digit result handling if result > 9
+    LEA DX, newline
+    MOV AH, 09h
+    INT 21h
 
-    ; Single-digit result
-    add bl, '0'      ; Convert single digit to ASCII
-    mov dl, bl
-    mov ah, 02h
-    int 21h          ; Print single-digit result
-    jmp done         ; Skip multi-digit handling
+    LEA DX, additionOutput2
+    MOV AH, 09h
+    INT 21h
 
-multi_digit:
-    ; Multi-digit result (handle both tens and ones digits)
-    mov al, bl       ; Move result into AL
-    xor ah, ah       ; Clear AH to prepare for division
-    mov cx, 10       ; Dividing by 10
-    div cx           ; AL = quotient (tens), AH = remainder (ones)
+    MOV AX, num2
+    call PrintNumber
 
-    mov al
+    LEA DX, newline
+    MOV AH, 09h
+    INT 21h
 
+    ; Perform addition
+    MOV AX, num1
+    ADD AX, num2
+    MOV result, AX
 
-    ; Display tens digit
-    mov dl, al
-    add al, '0'      ; Convert tens digit to ASCII
-    mov ah, 02h
-    int 21h          ; Print tens digit
+    ; Print result message
+    LEA DX, resultMsg
+    MOV AH, 09h
+    INT 21h
 
-    ; Display ones digit
-    mov dl, ah
-    add ah, '0'      ; Convert ones digit to ASCII
-    mov ah, 02h
-    int 21h          ; Print ones digit
+    ; Convert result to ASCII and print
+    MOV AX, result
+    CALL PrintNumber
 
-done:
-    ; Display newline
-    mov dx, OFFSET newline1
-    mov ah, 09h
-    int 21h
+    ; Exit program
+    MOV AX, 4C00h
+    INT 21h
+MAIN ENDP
 
-    
-end main
+; Subroutine to read a number from input
+ReadNumber PROC
+    XOR AX, AX          ; Clear AX (to store result)
+    XOR BX, BX          ; BX will hold the result
+ReadLoop:
+    MOV AH, 01h         ; Function to read a character from input
+    INT 21h             ; Read character
+    CMP AL, 0Dh         ; Check if Enter (0Dh is Enter)
+    JE DoneReading      ; If Enter is pressed, finish reading
+    SUB AL, '0'         ; Convert ASCII to digit
+    MOV CL, AL          ; Store the digit in CL
+    MOV AX, BX          ; Move current result into AX
+    MOV DX, 10          ; Prepare for multiplication by 10
+    MUL DX              ; AX = AX * 10 (shift left by one decimal place)
+    ADD AX, CX          ; Add the new digit to AX
+    MOV BX, AX          ; Store the result back in BX
+    JMP ReadLoop        ; Continue reading next digit
+DoneReading:
+    MOV AX, BX          ; Return the result in AX
+    RET
+ReadNumber ENDP
+
+; Subroutine to print a number
+PrintNumber PROC
+    XOR CX, CX          ; Clear CX (to store digit count)
+    MOV BX, 10          ; Divider for base 10
+    MOV DX, 0           ; Clear DX
+PrintLoop:
+    XOR DX, DX          ; Clear DX before DIV
+    DIV BX              ; Divide AX by 10
+    PUSH DX             ; Push remainder (digit) to stack
+    INC CX              ; Increment digit count
+    TEST AX, AX         ; Check if AX is 0
+    JNZ PrintLoop       ; If not, continue loop
+
+PrintDigits:
+    POP DX              ; Get digit from stack
+    ADD DL, '0'         ; Convert to ASCII
+    MOV AH, 02h         ; Function to print character
+    INT 21h             ; Print the digit
+    LOOP PrintDigits    ; Repeat for all digits
+
+    RET
+PrintNumber ENDP
+
+END MAIN
