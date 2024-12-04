@@ -1,3 +1,8 @@
+; Filename: EXER25.ASM
+; Programmer Name: YOUR FULLNAME HERE
+; Date: DATE TODAY
+; Description: remake prelim.asm with adjustments
+
 .model small
 .stack 100h
 .data
