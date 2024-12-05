@@ -453,7 +453,7 @@ MENU_LOOP:
     CMP AL, '3'
     JZ TYPED_DELETE
     CMP AL, '4'
-    JZ typed_EXIT
+    JZ TYPED_EXIT
     
     ; Invalid choice
     MOV DL, 0DH
@@ -486,7 +486,7 @@ TYPED_REVIEW:
 TYPED_DELETE:
     JMP DELETE_ORDER
 
-typed_EXIT:
+TYPED_EXIT:
     JMP EXITING
 
 CREATE_ORDER:
